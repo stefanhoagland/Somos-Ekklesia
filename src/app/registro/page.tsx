@@ -2,6 +2,7 @@ import Link from "next/link";
 import { campo, boton } from "@/lib/estilos";
 import { Avisos } from "@/app/Avisos";
 import { registrarse } from "@/app/acciones";
+import { Logo } from "@/app/Logo";
 
 export default async function Registro({
   searchParams,
@@ -12,6 +13,7 @@ export default async function Registro({
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 px-4">
+      <Logo tamano={72} />
       <h1 className="text-2xl font-bold">Crear cuenta</h1>
       <p className="text-stone-600 dark:text-stone-400">
         Pide a tu iglesia su código para unirte.

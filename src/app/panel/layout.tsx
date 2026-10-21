@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { exigirUsuario, NOMBRE_ROL } from "@/lib/sesion";
 import { salir } from "@/app/acciones";
+import { Logo } from "@/app/Logo";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,8 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     <div className="min-h-screen">
       <header className="border-b border-stone-200 dark:border-stone-800">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <Link href="/panel" className="font-bold">
+          <Link href="/panel" className="flex items-center gap-2 font-bold">
+            <Logo tamano={32} />
             {u.iglesiaNombre ?? "Somos Ekklesia"}
           </Link>
           <nav className="flex flex-wrap items-center gap-4 text-sm">

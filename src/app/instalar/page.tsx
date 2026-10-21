@@ -3,6 +3,7 @@ import { sql } from "@/lib/db";
 import { campo, boton } from "@/lib/estilos";
 import { Avisos } from "@/app/Avisos";
 import { instalar } from "@/app/acciones";
+import { Logo } from "@/app/Logo";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,7 @@ export default async function Instalar({
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 px-4">
+      <Logo tamano={72} />
       <h1 className="text-2xl font-bold">Primera instalación</h1>
       <p className="text-stone-600 dark:text-stone-400">
         Crea la cuenta de superadministrador. Con ella darás de alta las iglesias.
