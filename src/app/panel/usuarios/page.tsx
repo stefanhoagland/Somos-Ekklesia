@@ -1,25 +1,28 @@
 import { redirect } from "next/navigation";
-import { perfilActual, NOMBRE_ROL, type Perfil, type Rol } from "@/lib/perfil";
-import { crearClienteServidor } from "@/lib/supabase/server";
-import { cambiarRol } from "./actions";
+import { sql } from "@/lib/db";
+import { exigirUsuario, NOMBRE_ROL, type Rol } from "@/lib/sesion";
+import { botonSecundario } from "@/lib/estilos";
+import { cambiarRol } from "./acciones";
+
+type Fila = { id: string; nombre: string; email: string; rol: Rol };
 
 export default async function Usuarios() {
-  const yo = await perfilActual();
-  if (yo.rol !== "admin") redirect("/panel");
+  const yo = await exigirUsuario();
+  if (!yo.iglesiaId || yo.rol !== "admin") redirect("/panel");
 
-  const supabase = await crearClienteServidor();
-  const { data } = await supabase
-    .from("perfiles")
-    .select("id, nombre, email, rol")
-    .order("nombre");
-  const usuarios = (data ?? []) as Perfil[];
+  const [iglesia] = await sql<{ codigo: string }[]>`select codigo from iglesias where id = ${yo.iglesiaId}`;
+  const usuarios = await sql<Fila[]>`
+    select id, nombre, email, rol from usuarios
+    where iglesia_id = ${yo.iglesiaId} order by nombre
+  `;
 
   return (
     <>
       <h1 className="mb-2 text-2xl font-bold">Usuarios</h1>
       <p className="mb-6 text-sm text-stone-600 dark:text-stone-400">
-        Elige qué puede hacer cada persona. Los líderes ven la base de datos de
-        miembros y la planificación; los administradores además gestionan usuarios.
+        Para que alguien se una, comparte el código{" "}
+        <span className="font-mono font-semibold text-stone-900 dark:text-stone-100">{iglesia.codigo}</span>.
+        Los líderes ven miembros, registro de niños y planificación; los administradores además gestionan usuarios.
       </p>
       <ul className="divide-y divide-stone-200 dark:divide-stone-800">
         {usuarios.map((u) => (
@@ -42,9 +45,7 @@ export default async function Usuarios() {
                     <option key={r} value={r}>{NOMBRE_ROL[r]}</option>
                   ))}
                 </select>
-                <button className="rounded-lg border border-stone-300 px-3 py-1 text-sm dark:border-stone-700">
-                  Guardar
-                </button>
+                <button className={botonSecundario}>Guardar</button>
               </form>
             )}
           </li>
