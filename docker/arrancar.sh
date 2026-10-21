@@ -29,7 +29,6 @@ su-exec postgres psql -qtAc "select 1 from pg_roles where rolname='ekklesia'" | 
   || su-exec postgres psql -qc "create role ekklesia login"
 su-exec postgres psql -qtAc "select 1 from pg_database where datname='ekklesia'" | grep -q 1 \
   || su-exec postgres psql -qc "create database ekklesia owner ekklesia"
-su-exec postgres psql -q -d ekklesia -c "create extension if not exists pgcrypto"
 
 su-exec node node scripts/migrar.mjs
 

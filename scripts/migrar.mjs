@@ -7,7 +7,6 @@ import postgres from "postgres";
 const sql = postgres(process.env.DATABASE_URL, { max: 1, onnotice: () => {} });
 const carpeta = path.join(process.cwd(), "db", "migraciones");
 
-await sql`create extension if not exists pgcrypto`;
 await sql`
   create table if not exists migraciones (
     nombre text primary key,
