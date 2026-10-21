@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 
@@ -33,10 +33,13 @@ export async function crearSesion(usuarioId: string) {
     insert into sesiones (token_hash, usuario_id, expira_en)
     values (${hashToken(token)}, ${usuarioId}, ${expira})
   `;
+  // Cookie segura solo cuando se entra por HTTPS (por ejemplo, con Cloudflare Tunnel).
+  // Así también funciona por http://IP-del-servidor dentro de casa.
+  const https = (await headers()).get("x-forwarded-proto") === "https";
   (await cookies()).set(COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production" && process.env.COOKIE_INSEGURA !== "1",
+    secure: https,
     path: "/",
     expires: expira,
   });

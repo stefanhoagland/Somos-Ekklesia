@@ -9,7 +9,7 @@ La aplicación web para iglesias, con cuatro secciones:
 
 Un mismo sitio sirve a **varias iglesias**. Cada cuenta pertenece a una iglesia y solo ve los datos de esa iglesia.
 
-Está hecha con [Next.js](https://nextjs.org) y [PostgreSQL](https://www.postgresql.org), y se instala con Docker (pensado para un servidor Unraid).
+Está hecha con [Next.js](https://nextjs.org) y [PostgreSQL](https://www.postgresql.org), y se instala como **un solo contenedor Docker** (pensado para un servidor Unraid).
 
 ## Quién puede hacer qué
 
@@ -24,51 +24,60 @@ Está hecha con [Next.js](https://nextjs.org) y [PostgreSQL](https://www.postgre
 
 ## Instalación en Unraid
 
-Necesitas el plugin **Docker Compose Manager** (Apps > buscar "Compose Manager").
+Todo va en **un solo contenedor**: la app, la base de datos PostgreSQL, una copia de seguridad diaria y, si quieres, el túnel de Cloudflare. La imagen se publica sola en `ghcr.io/stefanhoagland/somos-ekklesia:latest` cada vez que cambia `main`.
 
-1. En **Docker > Compose > Add New Stack**, llámalo `somos-ekklesia`.
-2. Pega el contenido de [`docker-compose.yml`](docker-compose.yml) como archivo compose.
-3. En **Edit Stack > Env File**, pega [`.env.example`](.env.example) y cambia `POSTGRES_PASSWORD` por una contraseña larga.
-4. Pulsa **Compose Up**. La primera vez tarda unos minutos porque construye la app.
-5. Abre `http://IP-de-tu-servidor:3000`. Te llevará a **Primera instalación** para crear tu cuenta de superadministrador.
-   - Si entras por `http://` (sin HTTPS), pon `COOKIE_INSEGURA=1` en el env file, o el inicio de sesión no se guardará.
+1. En Unraid ve a **Docker > Add Container**.
+2. Rellena:
+   - **Name:** `somos-ekklesia`
+   - **Repository:** `ghcr.io/stefanhoagland/somos-ekklesia:latest`
+   - **Port:** contenedor `3000` → host `3000`
+   - **Path:** contenedor `/datos` → `/mnt/user/appdata/somos-ekklesia` (la base de datos)
+   - **Path:** contenedor `/copias` → `/mnt/user/backups/somos-ekklesia` (las copias de seguridad)
+   - **Variable** `TZ` (opcional): tu zona horaria, por ejemplo `America/Mexico_City`
+3. Pulsa **Apply** y abre `http://IP-de-tu-servidor:3000`. Te llevará a **Primera instalación** para crear tu cuenta de superadministrador.
 
-Se crean tres contenedores:
+También puedes usar la plantilla [`unraid/somos-ekklesia.xml`](unraid/somos-ekklesia.xml): cópiala en `/boot/config/plugins/dockerMan/templates-user/` y aparecerá en **Add Container > Template**.
 
-- `app`: la aplicación. Al arrancar aplica sola los cambios pendientes de la base de datos.
-- `db`: PostgreSQL. Los datos quedan en `/mnt/user/appdata/somos-ekklesia/postgres`.
-- `copias`: copia de seguridad diaria en `/mnt/user/backups/somos-ekklesia` (guarda 7 días, 4 semanas y 6 meses).
+Con Docker normal es lo mismo:
+
+```bash
+docker run -d --name somos-ekklesia --restart unless-stopped -p 3000:3000 \
+  -v /ruta/datos:/datos -v /ruta/copias:/copias ghcr.io/stefanhoagland/somos-ekklesia:latest
+```
+
+### Copias de seguridad
+
+El contenedor guarda una copia de la base de datos al arrancar y luego cada 24 horas en `/copias`, y borra las de más de 30 días (cámbialo con la variable `COPIAS_DIAS`).
+
+Para restaurar una copia:
+
+```bash
+gunzip -c /mnt/user/backups/somos-ekklesia/ekklesia-AAAAMMDD-HHMM.sql.gz \
+  | docker exec -i somos-ekklesia su-exec postgres psql -d ekklesia
+```
 
 ### Publicarlo en internet con Cloudflare Tunnel
 
 Así el sitio tiene HTTPS y no hace falta abrir puertos en tu router.
 
-1. Necesitas un dominio en Cloudflare (gratis si ya tienes uno).
-2. En [Cloudflare Zero Trust](https://one.dash.cloudflare.com) ve a **Networks > Tunnels > Create a tunnel**, tipo **Cloudflared**.
-3. Copia el token y ponlo en `CLOUDFLARE_TUNNEL_TOKEN` del env file.
-4. En **Public Hostname** pon tu dominio (por ejemplo `app.tuiglesia.org`) apuntando a `http://app:3000`.
-5. Arranca también el túnel: `docker compose --profile tunel up -d` (en Compose Manager, añade `--profile tunel` en las opciones de Compose Up).
-6. Vuelve a poner `COOKIE_INSEGURA=0`.
+1. Necesitas un dominio en Cloudflare.
+2. En [Cloudflare Zero Trust](https://one.dash.cloudflare.com) ve a **Networks > Tunnels > Create a tunnel**, tipo **Cloudflared**, y copia el token.
+3. En **Public Hostname** pon tu dominio (por ejemplo `app.tuiglesia.org`) apuntando a `http://localhost:3000`.
+4. En Unraid, edita el contenedor y añade la variable `CLOUDFLARE_TUNNEL_TOKEN` con ese token.
 
 ### Actualizar a una versión nueva
 
-En Compose Manager pulsa **Compose Down** y luego **Compose Up** con la opción de reconstruir (`--build`). Los datos no se tocan.
-
-### Restaurar una copia de seguridad
-
-```bash
-gunzip -c /mnt/user/backups/somos-ekklesia/daily/ekklesia-AAAAMMDD.sql.gz \
-  | docker exec -i somos-ekklesia-db-1 psql -U ekklesia -d ekklesia
-```
+En **Docker**, pulsa en el icono del contenedor y elige **Force Update**. Los datos no se tocan, y los cambios de base de datos se aplican solos al arrancar.
 
 ## Privacidad
 
-Este repositorio es **público**. Los datos de las iglesias viven solo en tu base de datos. Nunca subas aquí hojas de cálculo de miembros ni el archivo `.env` (están bloqueados en `.gitignore`).
+Este repositorio es **público**. Los datos de las iglesias viven solo en tu base de datos. Nunca subas aquí hojas de cálculo de miembros ni archivos `.env` (están bloqueados en `.gitignore`).
 
 ## Desarrollo
 
 ```bash
 docker run -d --name ekk-db -e POSTGRES_USER=ekklesia -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=ekklesia -p 5432:5432 postgres:16-alpine
+cp .env.example .env.local
 export DATABASE_URL=postgres://ekklesia:dev@localhost:5432/ekklesia
 npm install
 npm run migrar
