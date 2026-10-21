@@ -17,4 +17,8 @@
   <Config Name="Días de copias" Target="COPIAS_DIAS" Default="30" Mode="" Description="Cuántos días se guardan las copias" Type="Variable" Display="always" Required="false" Mask="false">30</Config>
   <Config Name="Zona horaria" Target="TZ" Default="America/Mexico_City" Mode="" Description="Zona horaria (por ejemplo America/Mexico_City o Europe/Madrid)" Type="Variable" Display="always" Required="false" Mask="false">America/Mexico_City</Config>
   <Config Name="Token de Cloudflare Tunnel" Target="CLOUDFLARE_TUNNEL_TOKEN" Default="" Mode="" Description="Opcional. Para publicar el sitio en internet con HTTPS" Type="Variable" Display="always" Required="false" Mask="true"></Config>
+  <Config Name="Dirección del sitio" Target="SITIO_URL" Default="" Mode="" Description="Dirección pública, por ejemplo https://app.tudominio.org (para los enlaces de los correos)" Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="Correo remitente" Target="CORREO_REMITENTE" Default="" Mode="" Description="Por ejemplo: Somos Ekklesia &lt;invitaciones@tudominio.org&gt;" Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="Brevo: login SMTP" Target="SMTP_USUARIO" Default="" Mode="" Description="Brevo &gt; SMTP &amp; API &gt; SMTP (algo como xxxx@smtp-brevo.com)" Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="Brevo: clave SMTP" Target="SMTP_CLAVE" Default="" Mode="" Description="La clave SMTP de Brevo" Type="Variable" Display="always" Required="false" Mask="true"></Config>
 </Container>

@@ -65,6 +65,24 @@ Así el sitio tiene HTTPS y no hace falta abrir puertos en tu router.
 3. En **Public Hostname** pon tu dominio (por ejemplo `app.tuiglesia.org`) apuntando a `http://localhost:3000`.
 4. En Unraid, edita el contenedor y añade la variable `CLOUDFLARE_TUNNEL_TOKEN` con ese token.
 
+### Invitaciones por correo (Brevo)
+
+Los administradores pueden invitar gente por correo desde **Usuarios > Invitar por correo**. Para que funcione:
+
+1. Crea una cuenta gratis en [Brevo](https://www.brevo.com) (300 correos al día).
+2. Autentica tu dominio en **Settings > Senders, Domains & Dedicated IPs > Domains > Add a domain**. Si el dominio está en Cloudflare, Brevo añade los registros DNS solo.
+3. En **SMTP & API > SMTP**, pulsa **Generate a new SMTP key**. Copia el login y la clave.
+4. En Unraid, edita el contenedor y añade estas variables:
+
+| Variable | Ejemplo |
+| --- | --- |
+| `SITIO_URL` | `https://app.tudominio.org` |
+| `CORREO_REMITENTE` | `Somos Ekklesia <invitaciones@tudominio.org>` |
+| `SMTP_USUARIO` | `xxxx@smtp-brevo.com` |
+| `SMTP_CLAVE` | la clave SMTP de Brevo |
+
+Para otro proveedor, cambia también `SMTP_HOST` (por defecto `smtp-relay.brevo.com`) y `SMTP_PUERTO` (por defecto `587`).
+
 ### Actualizar a una versión nueva
 
 En **Docker**, pulsa en el icono del contenedor y elige **Force Update**. Los datos no se tocan, y los cambios de base de datos se aplican solos al arrancar.
