@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { exigirUsuario, NOMBRE_ROL, type Rol } from "@/lib/sesion";
-import { botonSecundario } from "@/lib/estilos";
+import { boton, botonSecundario } from "@/lib/estilos";
 import { cambiarRol } from "./acciones";
 
 type Fila = { id: string; nombre: string; email: string; rol: Rol };
@@ -18,7 +19,10 @@ export default async function Usuarios() {
 
   return (
     <>
-      <h1 className="mb-2 text-2xl font-bold">Usuarios</h1>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold">Usuarios</h1>
+        <Link href="/panel/usuarios/invitar" className={boton}>Invitar por correo</Link>
+      </div>
       <p className="mb-6 text-sm text-stone-600 dark:text-stone-400">
         Para que alguien se una, comparte el código{" "}
         <span className="font-mono font-semibold text-stone-900 dark:text-stone-100">{iglesia.codigo}</span>.
