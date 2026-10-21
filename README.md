@@ -1,53 +1,87 @@
 # Somos Ekklesia
 
-La aplicación web de la iglesia, con cuatro secciones:
+La aplicación web para iglesias, con cuatro secciones:
 
 1. **App para miembros:** grupos, mensajes, sermones y ofrendas.
 2. **Miembros:** base de datos de miembros con control de asistencia.
 3. **Registro de niños:** etiquetas de identificación y recogida.
 4. **Planificación del culto:** planes de servicio, canciones y voluntarios.
 
-Está hecha con [Next.js](https://nextjs.org), [Supabase](https://supabase.com) (inicio de sesión y base de datos) y se publica en [Vercel](https://vercel.com).
+Un mismo sitio sirve a **varias iglesias**. Cada cuenta pertenece a una iglesia y solo ve los datos de esa iglesia.
 
-## Roles
+Está hecha con [Next.js](https://nextjs.org) y [PostgreSQL](https://www.postgresql.org), y se instala como **un solo contenedor Docker** (pensado para un servidor Unraid).
+
+## Quién puede hacer qué
 
 | Rol | Qué puede hacer |
 | --- | --- |
-| Administrador | Todo, incluido cambiar el rol de otras personas en **Usuarios** |
-| Líder | Ver miembros, registro de niños y planificación del culto |
-| Miembro | Usar la app para miembros |
+| Superadministrador | Dar de alta iglesias y ver sus códigos. Es la primera cuenta que se crea al instalar. |
+| Administrador | Todo dentro de su iglesia, incluido cambiar roles en **Usuarios**. |
+| Líder | Ver miembros, registro de niños y planificación del culto de su iglesia. |
+| Miembro | Usar la app para miembros. |
 
-La **primera persona que se registra** queda como administrador. Las demás entran como miembro, y un administrador puede cambiarlas.
+**Cómo se une la gente:** el superadministrador crea una iglesia y obtiene un código de 6 letras (por ejemplo `NHN34X`). Las personas se registran en `/registro` con ese código. La primera persona de cada iglesia queda como su administrador; las demás entran como miembro.
 
-## Puesta en marcha (una sola vez)
+## Instalación en Unraid
 
-### 1. Crear la base de datos en Supabase
+Todo va en **un solo contenedor**: la app, la base de datos PostgreSQL, una copia de seguridad diaria y, si quieres, el túnel de Cloudflare. La imagen se publica sola en `ghcr.io/stefanhoagland/somos-ekklesia:latest` cada vez que cambia `main`.
 
-1. Crea una cuenta gratis en [supabase.com](https://supabase.com) y un proyecto nuevo.
-2. En el proyecto, abre **SQL Editor > New query**, pega el contenido de `supabase/migrations/0001_perfiles_y_roles.sql` y pulsa **Run**.
-3. En **Project Settings > API** copia la *Project URL* y la clave *anon public*.
+1. En Unraid ve a **Docker > Add Container**.
+2. Rellena:
+   - **Name:** `somos-ekklesia`
+   - **Repository:** `ghcr.io/stefanhoagland/somos-ekklesia:latest`
+   - **Port:** contenedor `3000` → host `3000`
+   - **Path:** contenedor `/datos` → `/mnt/user/appdata/somos-ekklesia` (la base de datos)
+   - **Path:** contenedor `/copias` → `/mnt/user/backups/somos-ekklesia` (las copias de seguridad)
+   - **Variable** `TZ` (opcional): tu zona horaria, por ejemplo `America/Mexico_City`
+3. Pulsa **Apply** y abre `http://IP-de-tu-servidor:3000`. Te llevará a **Primera instalación** para crear tu cuenta de superadministrador.
 
-### 2. Publicar en Vercel
+También puedes usar la plantilla [`unraid/somos-ekklesia.xml`](unraid/somos-ekklesia.xml): cópiala en `/boot/config/plugins/dockerMan/templates-user/` y aparecerá en **Add Container > Template**.
 
-1. Crea una cuenta en [vercel.com](https://vercel.com) con tu GitHub e importa este repositorio.
-2. Antes de pulsar **Deploy**, añade dos variables de entorno:
-   - `NEXT_PUBLIC_SUPABASE_URL` = la Project URL
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = la clave anon public
-3. Cuando termine, copia la dirección del sitio (por ejemplo `https://somos-ekklesia.vercel.app`).
-4. En Supabase, ve a **Authentication > URL Configuration** y pon esa dirección en **Site URL**.
+Con Docker normal es lo mismo:
 
-### 3. Crear tu cuenta de administrador
+```bash
+docker run -d --name somos-ekklesia --restart unless-stopped -p 3000:3000 \
+  -v /ruta/datos:/datos -v /ruta/copias:/copias ghcr.io/stefanhoagland/somos-ekklesia:latest
+```
 
-Abre el sitio, pulsa **Entrar > Regístrate** y crea tu cuenta. Al ser la primera, serás administrador.
+### Copias de seguridad
+
+El contenedor guarda una copia de la base de datos al arrancar y luego cada 24 horas en `/copias`, y borra las de más de 30 días (cámbialo con la variable `COPIAS_DIAS`).
+
+Para restaurar una copia:
+
+```bash
+gunzip -c /mnt/user/backups/somos-ekklesia/ekklesia-AAAAMMDD-HHMM.sql.gz \
+  | docker exec -i somos-ekklesia su-exec postgres psql -d ekklesia
+```
+
+### Publicarlo en internet con Cloudflare Tunnel
+
+Así el sitio tiene HTTPS y no hace falta abrir puertos en tu router.
+
+1. Necesitas un dominio en Cloudflare.
+2. En [Cloudflare Zero Trust](https://one.dash.cloudflare.com) ve a **Networks > Tunnels > Create a tunnel**, tipo **Cloudflared**, y copia el token.
+3. En **Public Hostname** pon tu dominio (por ejemplo `app.tuiglesia.org`) apuntando a `http://localhost:3000`.
+4. En Unraid, edita el contenedor y añade la variable `CLOUDFLARE_TUNNEL_TOKEN` con ese token.
+
+### Actualizar a una versión nueva
+
+En **Docker**, pulsa en el icono del contenedor y elige **Force Update**. Los datos no se tocan, y los cambios de base de datos se aplican solos al arrancar.
 
 ## Privacidad
 
-Este repositorio es **público**. Los datos de miembros viven solo en Supabase y nunca deben subirse aquí (ni el Excel de miembros ni el archivo `.env.local`).
+Este repositorio es **público**. Los datos de las iglesias viven solo en tu base de datos. Nunca subas aquí hojas de cálculo de miembros ni archivos `.env` (están bloqueados en `.gitignore`).
 
-## Desarrollo local
+## Desarrollo
 
 ```bash
-cp .env.example .env.local   # y rellena los valores
+docker run -d --name ekk-db -e POSTGRES_USER=ekklesia -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=ekklesia -p 5432:5432 postgres:16-alpine
+cp .env.example .env.local
+export DATABASE_URL=postgres://ekklesia:dev@localhost:5432/ekklesia
 npm install
+npm run migrar
 npm run dev
 ```
+
+Los cambios de base de datos van en `db/migraciones/` como archivos `NNNN_nombre.sql`. Se aplican en orden y una sola vez.

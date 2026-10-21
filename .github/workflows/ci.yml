@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  # Construye el contenedor único y comprueba que arranca, guarda datos y hace copias.
+  contenedor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t ekklesia:prueba .
+      - name: Arrancar
+        run: |
+          mkdir -p datos copias
+          docker run -d --name ekk -p 3000:3000 -v "$PWD/datos:/datos" -v "$PWD/copias:/copias" ekklesia:prueba
+          for i in $(seq 1 60); do curl -fs http://localhost:3000/ >/dev/null && break; sleep 2; done
+          docker logs ekk
+      - name: Sin usuarios, /login lleva a /instalar
+        run: |
+          test "$(curl -s -o /dev/null -w '%{redirect_url}' http://localhost:3000/login)" = "http://localhost:3000/instalar" \
+            || curl -s http://localhost:3000/login | grep -q "Primera instalación"
+      - name: Hay copia de seguridad
+        run: ls copias/ekklesia-*.sql.gz
+      - name: Los datos sobreviven a un reinicio
+        run: |
+          docker exec ekk su-exec postgres psql -d ekklesia -c "insert into iglesias (nombre, codigo) values ('Prueba', 'ABC123')"
+          docker restart ekk
+          for i in $(seq 1 60); do curl -fs http://localhost:3000/ >/dev/null && break; sleep 2; done
+          docker exec ekk su-exec postgres psql -d ekklesia -tAc "select codigo from iglesias" | grep -q ABC123
+          docker logs ekk | tail -20

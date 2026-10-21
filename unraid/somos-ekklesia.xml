@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>somos-ekklesia</Name>
+  <Repository>ghcr.io/stefanhoagland/somos-ekklesia:latest</Repository>
+  <Registry>https://github.com/stefanhoagland/Somos-Ekklesia/pkgs/container/somos-ekklesia</Registry>
+  <Network>bridge</Network>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/stefanhoagland/Somos-Ekklesia</Support>
+  <Project>https://github.com/stefanhoagland/Somos-Ekklesia</Project>
+  <Overview>App para iglesias: miembros, asistencia, registro de niños y planificación del culto. Incluye base de datos y copias de seguridad diarias en un solo contenedor.</Overview>
+  <Category>Productivity:</Category>
+  <WebUI>http://[IP]:[PORT:3000]/</WebUI>
+  <Config Name="Puerto web" Target="3000" Default="3000" Mode="tcp" Description="Puerto para abrir la app en tu red" Type="Port" Display="always" Required="true" Mask="false">3000</Config>
+  <Config Name="Datos" Target="/datos" Default="/mnt/user/appdata/somos-ekklesia" Mode="rw" Description="Base de datos (no la borres)" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/somos-ekklesia</Config>
+  <Config Name="Copias de seguridad" Target="/copias" Default="/mnt/user/backups/somos-ekklesia" Mode="rw" Description="Copia diaria de la base de datos" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/backups/somos-ekklesia</Config>
+  <Config Name="Días de copias" Target="COPIAS_DIAS" Default="30" Mode="" Description="Cuántos días se guardan las copias" Type="Variable" Display="always" Required="false" Mask="false">30</Config>
+  <Config Name="Zona horaria" Target="TZ" Default="America/Mexico_City" Mode="" Description="Zona horaria (por ejemplo America/Mexico_City o Europe/Madrid)" Type="Variable" Display="always" Required="false" Mask="false">America/Mexico_City</Config>
+  <Config Name="Token de Cloudflare Tunnel" Target="CLOUDFLARE_TUNNEL_TOKEN" Default="" Mode="" Description="Opcional. Para publicar el sitio en internet con HTTPS" Type="Variable" Display="always" Required="false" Mask="true"></Config>
+</Container>
