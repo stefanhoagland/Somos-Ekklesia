@@ -1,9 +1,14 @@
 import Link from "next/link";
+import { Logo } from "./Logo";
 
 export default function Inicio() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center gap-6 px-4">
-      <h1 className="text-4xl font-bold">Somos Ekklesia</h1>
+    <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-6 px-4 text-center">
+      <Logo tamano={120} />
+      <div>
+        <h1 className="font-serif text-4xl font-bold tracking-wide">SOMOS EKKLESIA</h1>
+        <p className="mt-1 font-serif text-sm tracking-[0.4em] text-stone-500">ΕΚΚΛΗΣΙΑ</p>
+      </div>
       <p className="text-lg text-stone-600 dark:text-stone-400">
         Grupos, mensajes, sermones y ofrendas de nuestra iglesia, todo en un
         mismo lugar.

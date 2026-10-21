@@ -4,6 +4,7 @@ import { sql } from "@/lib/db";
 import { campo, boton } from "@/lib/estilos";
 import { Avisos } from "@/app/Avisos";
 import { iniciarSesion } from "@/app/acciones";
+import { Logo } from "@/app/Logo";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ export default async function Login({
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 px-4">
+      <Logo tamano={72} />
       <h1 className="text-2xl font-bold">Iniciar sesión</h1>
       <Avisos error={error} />
       <form action={iniciarSesion} className="flex flex-col gap-3">
