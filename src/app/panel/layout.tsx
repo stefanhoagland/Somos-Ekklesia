@@ -16,6 +16,12 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           </Link>
           <nav className="flex flex-wrap items-center gap-4 text-sm">
             {u.esSuperadmin && <Link href="/panel/iglesias">Iglesias</Link>}
+            {u.iglesiaId && u.rol !== "miembro" && (
+              <>
+                <Link href="/panel/miembros">Miembros</Link>
+                <Link href="/panel/asistencia">Asistencia</Link>
+              </>
+            )}
             {u.iglesiaId && u.rol === "admin" && <Link href="/panel/usuarios">Usuarios</Link>}
             <span className="text-stone-500">
               {u.nombre || u.email} · {u.iglesiaId ? NOMBRE_ROL[u.rol] : "Superadministrador"}

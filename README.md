@@ -69,6 +69,15 @@ Así el sitio tiene HTTPS y no hace falta abrir puertos en tu router.
 
 En **Docker**, pulsa en el icono del contenedor y elige **Force Update**. Los datos no se tocan, y los cambios de base de datos se aplican solos al arrancar.
 
+## Miembros y asistencia
+
+Los administradores y líderes de cada iglesia tienen dos páginas:
+
+- **Miembros:** lista con buscador y filtro por estado (miembro, visitante, inactivo), alta y edición a mano. **Importar Excel** acepta `.xlsx` o `.csv` con encabezados en la primera fila. Adivina qué columna es cada dato, deja revisarlo con una vista previa e importa todo o nada.
+- **Asistencia:** crea un culto o reunión con su fecha y marca quién vino. Si viene alguien nuevo, se añade como visitante desde la misma página. La lista de miembros muestra la última asistencia de cada persona.
+
+Solo los administradores pueden borrar miembros o eventos.
+
 ## Privacidad
 
 Este repositorio es **público**. Los datos de las iglesias viven solo en tu base de datos. Nunca subas aquí hojas de cálculo de miembros ni archivos `.env` (están bloqueados en `.gitignore`).
