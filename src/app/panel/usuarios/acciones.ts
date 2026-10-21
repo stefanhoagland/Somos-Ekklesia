@@ -1,0 +1,20 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { sql } from "@/lib/db";
+import { exigirUsuario, type Rol } from "@/lib/sesion";
+
+const ROLES: Rol[] = ["admin", "lider", "miembro"];
+
+export async function cambiarRol(f: FormData) {
+  const yo = await exigirUsuario();
+  if (!yo.iglesiaId || yo.rol !== "admin") return;
+
+  const id = String(f.get("id"));
+  const rol = String(f.get("rol")) as Rol;
+  if (!ROLES.includes(rol) || id === yo.id) return;
+
+  // Solo dentro de la misma iglesia.
+  await sql`update usuarios set rol = ${rol} where id = ${id} and iglesia_id = ${yo.iglesiaId}`;
+  revalidatePath("/panel/usuarios");
+}
