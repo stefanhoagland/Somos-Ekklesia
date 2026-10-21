@@ -1,9 +1,17 @@
 import Link from "next/link";
 import { exigirUsuario, type Rol } from "@/lib/sesion";
 
-const SECCIONES: { titulo: string; texto: string; roles: Rol[] }[] = [
+const SECCIONES: { titulo: string; texto: string; roles: Rol[]; enlaces?: { href: string; texto: string }[] }[] = [
   { titulo: "App para miembros", texto: "Grupos, mensajes, sermones y ofrendas.", roles: ["admin", "lider", "miembro"] },
-  { titulo: "Miembros", texto: "Base de datos de miembros y control de asistencia.", roles: ["admin", "lider"] },
+  {
+    titulo: "Miembros",
+    texto: "Base de datos de miembros y control de asistencia.",
+    roles: ["admin", "lider"],
+    enlaces: [
+      { href: "/panel/miembros", texto: "Ver miembros" },
+      { href: "/panel/asistencia", texto: "Pasar lista" },
+    ],
+  },
   { titulo: "Registro de niños", texto: "Registro con etiquetas de identificación y recogida.", roles: ["admin", "lider"] },
   { titulo: "Planificación del culto", texto: "Planes de servicio, canciones y voluntarios.", roles: ["admin", "lider"] },
 ];
@@ -32,7 +40,15 @@ export default async function Panel() {
           <div key={s.titulo} className="rounded-xl border border-stone-200 p-5 dark:border-stone-800">
             <h2 className="font-semibold">{s.titulo}</h2>
             <p className="mt-1 text-sm text-stone-600 dark:text-stone-400">{s.texto}</p>
-            <p className="mt-3 text-xs uppercase tracking-wide text-stone-400">Próximamente</p>
+            {s.enlaces ? (
+              <div className="mt-3 flex gap-4 text-sm">
+                {s.enlaces.map((e) => (
+                  <Link key={e.href} href={e.href} className="font-medium underline">{e.texto}</Link>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-3 text-xs uppercase tracking-wide text-stone-400">Próximamente</p>
+            )}
           </div>
         ))}
       </div>
