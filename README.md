@@ -15,8 +15,8 @@ Está hecha con [Next.js](https://nextjs.org) y [PostgreSQL](https://www.postgre
 
 | Rol | Qué puede hacer |
 | --- | --- |
-| Superadministrador | Dar de alta iglesias y ver sus códigos. Es la primera cuenta que se crea al instalar. |
-| Administrador | Todo dentro de su iglesia, incluido cambiar roles en **Usuarios**. |
+| Superadministrador | Dar de alta iglesias, ver a su gente y ser el único que nombra o quita administradores. Es la primera cuenta que se crea al instalar. |
+| Administrador | Todo dentro de su iglesia. En **Usuarios** puede hacer a alguien líder o miembro, pero no administrador. |
 | Líder | Ver miembros, registro de niños y planificación del culto de su iglesia. |
 | Miembro | Usar la app para miembros. |
 

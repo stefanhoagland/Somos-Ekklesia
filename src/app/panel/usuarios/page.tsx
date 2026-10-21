@@ -22,7 +22,7 @@ export default async function Usuarios() {
       <p className="mb-6 text-sm text-stone-600 dark:text-stone-400">
         Para que alguien se una, comparte el código{" "}
         <span className="font-mono font-semibold text-stone-900 dark:text-stone-100">{iglesia.codigo}</span>.
-        Los líderes ven miembros, registro de niños y planificación; los administradores además gestionan usuarios.
+        Aquí puedes hacer a alguien líder o miembro. Los líderes ven miembros, asistencia y planificación. Para nombrar o quitar administradores, habla con el superadministrador.
       </p>
       <ul className="divide-y divide-stone-200 dark:divide-stone-800">
         {usuarios.map((u) => (
@@ -33,6 +33,8 @@ export default async function Usuarios() {
             </div>
             {u.id === yo.id ? (
               <span className="text-sm">{NOMBRE_ROL[u.rol]} (tú)</span>
+            ) : u.rol === "admin" ? (
+              <span className="text-sm">{NOMBRE_ROL[u.rol]}</span>
             ) : (
               <form action={cambiarRol} className="flex gap-2">
                 <input type="hidden" name="id" value={u.id} />
@@ -41,7 +43,7 @@ export default async function Usuarios() {
                   defaultValue={u.rol}
                   className="rounded-lg border border-stone-300 bg-transparent px-2 py-1 dark:border-stone-700"
                 >
-                  {(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => (
+                  {(["lider", "miembro"] as Rol[]).map((r) => (
                     <option key={r} value={r}>{NOMBRE_ROL[r]}</option>
                   ))}
                 </select>
